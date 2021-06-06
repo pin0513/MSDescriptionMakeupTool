@@ -11,7 +11,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using DeployWizardUtils;
 
 namespace MsDescriptionMakeUpTool
 {
@@ -26,7 +25,41 @@ namespace MsDescriptionMakeUpTool
 
         private ConcurrentDictionary<string, TableDesciption> _collections;
 
+        public static bool CheckSQLConnection(string tb資料庫主機帳號Text, bool isShowSuccess)
+        {
+            try
+            {
+                using (var connection = new SqlConnection(tb資料庫主機帳號Text))
+                {
+                    try
+                    {
+                        connection.Open();
 
+                        if (connection.State == ConnectionState.Open)
+                        {
+                            if (isShowSuccess)
+                                MessageBox.Show("連線成功");
+                            connection.Close();
+                            return true;
+                        }
+                        else
+                        {
+                            MessageBox.Show("連線失敗");
+                        }
+                    }
+                    catch (SqlException ex)
+                    {
+                        MessageBox.Show(ex.Message);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show("連線失敗, Msg:" + e.Message);
+            }
+
+            return false;
+        }
 
         private void btnConnectDB_Click(object sender, EventArgs e)
         {
@@ -35,7 +68,7 @@ namespace MsDescriptionMakeUpTool
             _connectionString = tbConnStr.Text;
             var scsb = new SqlConnectionStringBuilder(_connectionString);
 
-            DeployWizardUtils.SqlHelper.CheckSQLConnection(_connectionString, true);
+            CheckSQLConnection(_connectionString, true);
 
             if (!string.IsNullOrEmpty(scsb.InitialCatalog))
             {
@@ -155,7 +188,7 @@ namespace MsDescriptionMakeUpTool
         {
             try
             {
-                if (SqlHelper.CheckSQLConnection(_connectionString, false))
+                if (CheckSQLConnection(_connectionString, false))
                 {
                     if (cbDBList.SelectedValue == null) return;
                     var tableName = cbDBList.SelectedValue.ToString();
@@ -181,7 +214,7 @@ namespace MsDescriptionMakeUpTool
         {
             try
             {
-                if (SqlHelper.CheckSQLConnection(_connectionString, false))
+                if (CheckSQLConnection(_connectionString, false))
                 {
                     //統一處理異動
 
@@ -284,7 +317,7 @@ END
         {
             try
             {
-                if (SqlHelper.CheckSQLConnection(_connectionString, false))
+                if (CheckSQLConnection(_connectionString, false))
                 {
                     if (cbDBList.SelectedValue == null) return;
                     var tableName = cbDBList.SelectedValue.ToString();
@@ -342,7 +375,7 @@ END
 
         private void dataGridView1_CellEndEdit(object sender, DataGridViewCellEventArgs e)
         {
-            if (SqlHelper.CheckSQLConnection(_connectionString, false))
+            if (CheckSQLConnection(_connectionString, false))
             {
                 if (cbDBList.SelectedValue == null) return;
                 var tableName = cbDBList.SelectedValue.ToString();
@@ -368,7 +401,7 @@ END
 
         private void tbMS_DescriptionForTable_TextChanged(object sender, EventArgs e)
         {
-            if (SqlHelper.CheckSQLConnection(_connectionString, false))
+            if (CheckSQLConnection(_connectionString, false))
             {
                 if (cbDBList.SelectedValue == null) return;
                 var tableName = cbDBList.SelectedValue.ToString();
